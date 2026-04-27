@@ -9,6 +9,7 @@ def load_models():
     try:
         lr_model = joblib.load('model/redbull_regression_model.pkl')
         rf_model = joblib.load('model/redbull_randomforest_model.pkl')
+        st.sidebar.success('✅ โหลดโมเดลสำเร็จ!')
         return lr_model, rf_model
     except FileNotFoundError:
         st.error("Error: Model files not found. Please make sure 'redbull_regression_model.pkl' and 'redbull_randomforest_model.pkl' are in the same directory as the Streamlit app, or update the file paths.")
@@ -53,27 +54,29 @@ def preprocess_input(input_df, train_columns):
     return final_df.astype(float) # Ensure all numerical for model prediction
 
 # --- Streamlit UI ---
+st.set_page_config(page_title="Red Bull Sales Prediction App", layout="centered")
 st.title("📈 Red Bull Sales Prediction App")
-st.markdown("### ทำนายจำนวน Units_Sold โดยใช้โมเดล Machine Learning")
-
-st.sidebar.header("Input Features")
-
-# Input fields for user
-product_variant = st.sidebar.selectbox('Product Variant', ['EnergyShot', 'Original', 'Sugarfree'])
-region = st.sidebar.selectbox('Region', ['TH-NORTH', 'ASIA-PACIFIC', 'TH-EAST', 'TH-CENTRAL', 'EUROPE-EU', 'TH-SOUTH', 'USA-EAST', 'USA-WEST'])
-channel = st.sidebar.selectbox('Channel', ['extreme sports', 'f1 sponsorship', 'TV Ad', 'in-store promo', 'Social Media'])
-unit_price = st.sidebar.number_input('Unit Price', min_value=20.0, max_value=60.0, value=38.0, step=0.1)
-marketing_spend = st.sidebar.number_input('Marketing Spend', min_value=10000.0, max_value=300000.0, value=150000.0, step=1000.0)
-logistics_delay = st.sidebar.slider('Logistics Delay (days)', min_value=0, max_value=90, value=45)
-customer_score = st.sidebar.slider('Customer Score', min_value=1, max_value=100, value=50)
-
+st.subheader("ทำนายจำนวน Units_Sold โดยใช้โมเดล ML ")
 # Model selection
+st.info("โมเดลที่ใช้ในการทำนาย")
 model_choice = st.radio(
-    "Select Prediction Model",
+    "กรุณาเลือกโมเดล",
     ('Linear Regression', 'Random Forest')
 )
 
-if st.sidebar.button('Predict Units Sold'):
+st.header("Input Features")
+
+# Input fields for user
+product_variant = st.selectbox('Product Variant', ['EnergyShot', 'Original', 'Sugarfree'])
+region = st.selectbox('Region', ['TH-NORTH', 'ASIA-PACIFIC', 'TH-EAST', 'TH-CENTRAL', 'EUROPE-EU', 'TH-SOUTH', 'USA-EAST', 'USA-WEST'])
+channel = st.selectbox('Channel', ['extreme sports', 'f1 sponsorship', 'TV Ad', 'in-store promo', 'Social Media'])
+unit_price = st.number_input('Unit Price', min_value=20.0, max_value=60.0, value=38.0, step=0.1)
+marketing_spend = st.number_input('Marketing Spend', min_value=10000.0, max_value=300000.0, value=150000.0, step=1000.0)
+logistics_delay = st.slider('Logistics Delay (days)', min_value=0, max_value=90, value=45)
+customer_score = st.slider('Customer Score', min_value=1, max_value=100, value=50)
+
+
+if st.button('Predict Units Sold'):
     # Create a DataFrame from user input
     input_data = pd.DataFrame({
         'Product_Variant': [product_variant],
