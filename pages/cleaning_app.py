@@ -15,7 +15,7 @@ st.set_page_config(layout="wide", page_title="Data Cleaning Workshop App")
 st.title("🐂 Data Cleaning Workshop App") # ตั้งชื่อแอปพลิเคชัน
 st.markdown("ยินดีต้อนรับสู่แอปพลิเคชัน Data Cleaning!") # ข้อความต้อนรับ
 st.markdown("--- ท่านสามารถอัปโหลดไฟล์ CSV และเลือกขั้นตอนการทำความสะอาดข้อมูลได้ ---") # คำแนะนำเบื้องต้น
-st.error("ใช้สำหรับชุดข้อมูล redbull_workshop_dirty.csv เท่านั้น")
+st.error("ใช้สำหรับชุดข้อมูลที่มีโครงสร้างเหมือน redbull_workshop_dirty.csv เท่านั้น")
 
 # --- File Uploader ---
 uploaded_file = st.file_uploader("Upload your CSV file", type=["csv"]) # ช่องสำหรับอัปโหลดไฟล์ CSV
