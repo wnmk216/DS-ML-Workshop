@@ -244,3 +244,6 @@ if uploaded_file is not None: # ถ้ามีการอัปโหลดไ
         )
 else: # ถ้ายังไม่ได้อัปโหลดไฟล์
     st.info("Please upload a CSV file to begin data cleaning.") # แสดงข้อความให้ผู้ใช้อัปโหลดไฟล์
+    
+if st.button("🏠 กลับหน้าหลัก"):
+    st.switch_page("app.py")
