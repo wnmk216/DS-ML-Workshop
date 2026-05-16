@@ -274,4 +274,5 @@ if uploaded_file is not None:
         st.error(f"เกิดข้อผิดพลาดในการประมวลผลไฟล์: {e}")
 else:
     st.info("กรุณาอัปโหลดไฟล์ CSV เพื่อเริ่มต้น")
-
+if st.button("🏠 กลับหน้าหลัก"):
+    st.switch_page("app.py")
