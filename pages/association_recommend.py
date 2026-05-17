@@ -110,3 +110,6 @@ if st.button("💡 แนะนำ!"):
 
 st.markdown("---") # เส้นคั่น
 st.markdown("**ข้อมูลเพิ่มเติม:** \n*   `Lift` > 1: บ่งชี้ความสัมพันธ์เชิงบวก \n*   `Confidence`: ความน่าจะเป็นที่ผู้ซื้อจะซื้อ Consequent ถ้าซื้อ Antecedent") # ข้อมูลเพิ่มเติมเกี่ยวกับ Metrics
+    
+if st.button("🏠 กลับหน้าหลัก"): # สร้างปุ่ม 'กลับหน้าหลัก'
+    st.switch_page("app.py") # เปลี่ยนหน้าไปยัง 'app.py' 
