@@ -86,3 +86,6 @@ if st.button("จัดกลุ่มข้อมูล"):
         st.warning("กรุณาตรวจสอบการป้อนข้อมูลให้ครบถ้วน.") # แจ้งเตือนเมื่อข้อมูลไม่ครบถ้วน
 
 st.markdown("--- Boot Camp: Data Science and Machine Learning --- ") # ส่วนท้ายของแอป
+    
+if st.button("🏠 กลับหน้าหลัก"): # สร้างปุ่ม 'กลับหน้าหลัก'
+    st.switch_page("app.py") # เปลี่ยนหน้าไปยัง 'app.py' 
