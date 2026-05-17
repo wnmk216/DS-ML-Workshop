@@ -88,6 +88,12 @@ selected_for_prediction = loaded_unseen_data[loaded_unseen_data['Select'] == Tru
 if selected_for_prediction.empty: # ตรวจสอบว่ามีข้อมูลที่เลือกหรือไม่
     st.warning("กรุณาเลือกข้อมูลรถบรรทุกอย่างน้อยหนึ่งแถวเพื่อทำการพยากรณ์") # แสดงคำเตือนถ้าไม่มีข้อมูล
     st.stop() # หยุดการทำงานของแอปพลิเคชัน
+    # User input for start time
+col1, col2 = st.columns(2) # แบ่งหน้าจอเป็น 2 คอลัมน์
+with col1:
+    date_input = st.date_input("เลือกวันที่เริ่มต้นการประมวลผล", datetime.now().date()) # ให้ผู้ใช้เลือกวันที่เริ่มต้น
+with col2:
+    time_input = st.time_input("เลือกเวลาเริ่มต้นการประมวลผล", datetime.now().time()) # ให้ผู้ใช้เลือกเวลาเริ่มต้น
 
 
 # --- 3. Prediction Logic ---
@@ -125,12 +131,6 @@ if st.button("ทำการพยากรณ์และจัดตารา
     # --- 4. Scheduling Logic ---
     st.header("🗓️ ตารางเวลาการจัดคิวรถบรรทุก") # แสดงหัวข้อสำหรับตารางเวลา
 
-    # User input for start time
-    col1, col2 = st.columns(2) # แบ่งหน้าจอเป็น 2 คอลัมน์
-    with col1:
-        date_input = st.date_input("เลือกวันที่เริ่มต้นการประมวลผล", datetime.now().date()) # ให้ผู้ใช้เลือกวันที่เริ่มต้น
-    with col2:
-        time_input = st.time_input("เลือกเวลาเริ่มต้นการประมวลผล", datetime.now().time()) # ให้ผู้ใช้เลือกเวลาเริ่มต้น
 
     start_processing_time = datetime.combine(date_input, time_input) # รวมวันที่และเวลาที่เลือกเข้าด้วยกัน
     st.write(f"เวลาเริ่มต้นการประมวลผล: **{start_processing_time.strftime('%Y-%m-%d %H:%M:%S')}**") # แสดงเวลาเริ่มต้นที่ผู้ใช้เลือก
