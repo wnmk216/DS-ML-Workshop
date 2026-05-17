@@ -32,4 +32,5 @@ else:
         predicted_sales = loaded_model.predict(unseen_data_for_prediction)[0]
 
         st.success(f'ยอดขายที่คาดการณ์: {predicted_sales:,.2f} ล้านบาท')
-
+if st.button("🏠 กลับหน้าหลัก"): # สร้างปุ่ม 'กลับหน้าหลัก'
+    st.switch_page("app.py") # เปลี่ยนหน้าไปยัง 'app.py'
