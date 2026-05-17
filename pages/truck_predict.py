@@ -93,10 +93,116 @@ if selected_for_prediction.empty: # ตรวจสอบว่ามีข้�
 # --- Move Start Time Input here ---
 st.header("กำหนดเวลาเริ่มต้นสำหรับจัดตาราง")
 col1, col2 = st.columns(2) # แบ่งหน้าจอเป็น 2 คอลัมน์
-with col1:
-    date_input = st.date_input("เลือกวันที่เริ่มต้นการประมวลผล", datetime.now().date(), key="scheduling_date_input") # ให้ผู้ใช้เลือกวันที่เริ่มต้น
-with col2:
-    time_input = st.time_input("เลือกเวลาเริ่มต้นการประมวลผล", datetime.now().time(), key="scheduling_time_input") # ให้ผู้ใช้เลือกเวลาเริ่มต้น
 
-start_processing_time = datetime.combine(date_input, time_input)
-st.write(f
+# Initialize session state for date and time if not already set
+if 'start_date' not in st.session_state:
+    st.session_state.start_date = datetime.now().date()
+if 'start_time' not in st.session_state:
+    st.session_state.start_time = datetime.now().time()
+
+with col1:
+    date_input = st.date_input("เลือกวันที่เริ่มต้นการประมวลผล", value=st.session_state.start_date, key="scheduling_date_input") # ให้ผู้ใช้เลือกวันที่เริ่มต้น
+with col2:
+    time_input = st.time_input("เลือกเวลาเริ่มต้นการประมวลผล", value=st.session_state.start_time, key="scheduling_time_input") # ให้ผู้ใช้เลือกเวลาเริ่มต้น
+
+# Update session state if inputs change
+st.session_state.start_date = date_input
+st.session_state.start_time = time_input
+
+start_processing_time = datetime.combine(st.session_state.start_date, st.session_state.start_time)
+st.write(f"เวลาเริ่มต้นการประมวลผล: **{start_processing_time.strftime('%Y-%m-%d %H:%M:%S')}**")
+
+# --- 3. Prediction Logic ---
+if st.button("ทำการพยากรณ์และจัดตารางคิว"): # สร้างปุ่มสำหรับเริ่มการพยากรณ์และจัดตาราง
+    st.subheader("🔮 ผลการพยากรณ์") # แสดงหัวข้อย่อยสำหรับผลการพยากรณ์
+
+    # Separate features for prediction (remove Company_Name)
+    # Now using selected_for_prediction which already has 'Select' dropped
+    X_unseen_for_prediction = selected_for_prediction.drop(columns=['Company_Name'], errors='ignore') # ลบคอลัมน์ 'Company_Name' ออกก่อนนำไปทำนาย
+
+    # Ensure column order matches training data (from the kernel state, X.columns)
+    # The X.columns from kernel state is: ['Staff_Count', 'Total_Cartons', 'SKU_Count', 'Truck_Type_4-Wheel', 'Truck_Type_6-Wheel', 'Operation_Type_Pickup', 'Weather_Rain', 'Work_Shift_Night']
+    expected_model_columns = ['Staff_Count', 'Total_Cartons', 'SKU_Count', 'Truck_Type_4-Wheel', 'Truck_Type_6-Wheel', 'Operation_Type_Pickup', 'Weather_Rain', 'Work_Shift_Night']
+
+    # Check if all expected columns are in X_unseen_for_prediction
+    missing_cols = set(expected_model_columns) - set(X_unseen_for_prediction.columns)
+    if missing_cols:
+        st.error(f"❌ ข้อมูลที่อัปโหลด/แก้ไขไม่มีคอลัมน์ที่จำเป็นสำหรับการทำนาย: {', '.join(missing_cols)} กรุณาตรวจสอบรูปแบบไฟล์")
+        st.stop()
+
+    # Reindex to ensure correct column order and handle any extra columns from user input
+    X_unseen_for_prediction = X_unseen_for_prediction[expected_model_columns]
+
+
+    try:
+        predictions = loaded_model.predict(X_unseen_for_prediction) # ใช้โมเดลที่โหลดมาทำนายเวลาบริการ
+    except ValueError as e:
+        st.error(f"เกิดข้อผิดพลาดในการทำนาย: {e}. ตรวจสอบว่าคอลัมน์ในข้อมูลที่ทำนายตรงกับที่โมเดลฝึกไว้") # จัดการข้อผิดพลาดหากเกิดปัญหาในการทำนาย
+        st.stop()
+
+    prediction_results = selected_for_prediction.copy() # คัดลอกข้อมูลที่ถูกเลือก
+    prediction_results['Predicted_Service_Min'] = predictions # เพิ่มคอลัมน์ 'Predicted_Service_Min' ที่มีค่าการทำนาย
+    st.dataframe(prediction_results) # แสดง DataFrame ที่มีผลการทำนาย
+
+    # --- 4. Scheduling Logic ---
+    st.header("🗓️ ตารางเวลาการจัดคิวรถบรรทุก") # แสดงหัวข้อสำหรับตารางเวลา
+
+    # Create scheduling DataFrame from prediction results
+    scheduling_df = prediction_results.copy() # สร้าง DataFrame สำหรับการจัดตารางจากผลการทำนาย
+
+    # Sort by Predicted_Service_Min
+    scheduling_df = scheduling_df.sort_values(by='Predicted_Service_Min').reset_index(drop=True) # เรียงลำดับรถตามเวลาบริการที่ทำนายจากน้อยไปมาก
+
+    current_available_time = start_processing_time # กำหนดเวลาเริ่มต้นสำหรับรถคันแรก
+    suggested_arrival_times = [] # รายการสำหรับเก็บเวลาที่แนะนำให้รถมาถึง
+    completion_times = [] # รายการสำหรับเก็บเวลาที่รถจะบริการเสร็จ
+
+    for index, row in scheduling_df.iterrows(): # วนลูปเพื่อคำนวณเวลาสำหรับรถแต่ละคัน
+        suggested_arrival_times.append(current_available_time) # เพิ่มเวลาที่แนะนำให้รถมาถึง
+
+        service_duration = timedelta(minutes=row['Predicted_Service_Min']) # คำนวณระยะเวลาบริการ
+        current_completion_time = current_available_time + service_duration # คำนวณเวลาที่รถจะบริการเสร็จ
+        completion_times.append(current_completion_time) # เพิ่มเวลาที่บริการเสร็จ
+
+        current_available_time = current_completion_time # อัปเดตเวลาสำหรับรถคันถัดไป
+
+    scheduling_df['Suggested_Arrival_Time'] = suggested_arrival_times # เพิ่มคอลัมน์เวลาที่แนะนำให้รถมาถึง
+    scheduling_df['Completion_Time'] = completion_times # เพิ่มคอลัมน์เวลาที่บริการเสร็จ
+
+    # Display the scheduling table
+    display_cols = [ # กำหนดคอลัมน์ที่จะแสดงในตาราง
+        'Company_Name', 'Staff_Count', 'Total_Cartons', 'SKU_Count',
+        'Predicted_Service_Min', 'Suggested_Arrival_Time', 'Completion_Time'
+    ]
+    st.dataframe(scheduling_df[display_cols]) # แสดงตารางการจัดคิว
+
+    # --- 5. Gantt Chart Visualization ---
+    st.header("📊 Gantt Chart แสดงตารางคิวรถบรรทุก") # แสดงหัวข้อสำหรับ Gantt Chart
+
+    # Prepare data for Gantt Chart
+    scheduling_df['Task'] = scheduling_df['Company_Name'] + ' (เวลาบริการ: ' + scheduling_df['Predicted_Service_Min'].round(2).astype(str) + ' นาที)' # สร้างคอลัมน์ 'Task' สำหรับแสดงใน Gantt Chart
+
+    fig_gantt = px.timeline(scheduling_df, # สร้าง Gantt Chart
+                            x_start="Suggested_Arrival_Time",
+                            x_end="Completion_Time",
+                            y="Task",
+                            color="Predicted_Service_Min",
+                            color_continuous_scale=px.colors.sequential.Viridis,
+                            title="ตารางเวลาการจัดคิวรถบรรทุก (Gantt Chart)",
+                            labels={
+                                "Suggested_Arrival_Time": "เวลาที่ควรมาถึง",
+                                "Completion_Time": "เวลาที่บริการเสร็จ",
+                                "Task": "รถบรรทุก/บริษัท",
+                                "Predicted_Service_Min": "เวลาบริการที่คาดการณ์ (นาที)"
+                            },
+                            hover_name="Company_Name")
+
+    fig_gantt.update_yaxes(autorange="reversed") # จัดเรียงแกน Y แบบย้อนกลับ
+    fig_gantt.update_layout(xaxis_title="เวลา", yaxis_title="ลำดับรถ") # ตั้งชื่อแกน X และ Y
+
+    st.plotly_chart(fig_gantt, use_container_width=True) # แสดง Gantt Chart
+
+st.markdown("**วิธีใช้งาน:** \n1. อัปโหลดไฟล์ CSV หรือใช้ข้อมูลเริ่มต้น \n2. ตรวจสอบ แก้ไข และเลือกข้อมูลรถบรรทุกที่ต้องการพยากรณ์ในตาราง \n3. เลือกวันที่และเวลาเริ่มต้นที่ต้องการ \n4. กดปุ่ม 'ทำการพยากรณ์และจัดตารางคิว' \n5. ดูผลลัพธ์ตารางและ Gantt Chart ที่แสดงขึ้นมา") # แสดงคำแนะนำการใช้งาน
+
+if st.button("🏠 กลับหน้าหลัก"): # สร้างปุ่ม 'กลับหน้าหลัก'
+    st.switch_page("app.py") # เปลี่ยนหน้าไปยัง 'app.py' 
