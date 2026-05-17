@@ -14,7 +14,7 @@ st.write("แอปลิเคชันนี้ช่วยพยากรณ�
 def load_model():
     try:
         # Correcting the model path as per kernel state
-        model = joblib.load('service_time_model.pkl') # โหลดโมเดลที่บันทึกไว้
+        model = joblib.load('model/service_time_model.pkl') # โหลดโมเดลที่บันทึกไว้
         st.success("✅ โหลดโมเดล 'service_time_model.pkl' สำเร็จแล้ว!") # แสดงข้อความแจ้งว่าโหลดโมเดลสำเร็จ
         return model
     except FileNotFoundError:
