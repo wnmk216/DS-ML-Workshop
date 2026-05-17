@@ -107,4 +107,6 @@ if st.button('Predict Units Sold'):
 
     st.markdown("### Preprocessed Data (for verification)")
     st.dataframe(processed_input)
-
+    
+if st.button("🏠 กลับหน้าหลัก"): # สร้างปุ่ม 'กลับหน้าหลัก'
+    st.switch_page("app.py") # เปลี่ยนหน้าไปยัง 'app.py' 
