@@ -187,7 +187,7 @@ if st.button("ทำการพยากรณ์และจัดตารา
                             x_end="Completion_Time",
                             y="Task",
                             color="Predicted_Service_Min",
-                            color_continuous_scale=px.colors.sequential.Viridis,
+                            color_continuous_scale=px.colors.sequential.BuPu,
                             title="ตารางเวลาการจัดคิวรถบรรทุก (Gantt Chart)",
                             labels={
                                 "Suggested_Arrival_Time": "เวลาที่ควรมาถึง",
