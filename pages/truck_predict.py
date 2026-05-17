@@ -37,11 +37,11 @@ if uploaded_file is not None:
         for col in ['Truck_Type_4-Wheel', 'Truck_Type_6-Wheel', 'Operation_Type_Pickup', 'Weather_Rain', 'Work_Shift_Night']:
             if col in df_uploaded.columns:
                 df_uploaded[col] = df_uploaded[col].astype(bool)
-        
+
         # Add 'Company_Name' if missing, for display and scheduling
         if 'Company_Name' not in df_uploaded.columns:
             df_uploaded.insert(0, 'Company_Name', [f'รถบรรทุก {i+1}' for i in range(len(df_uploaded))])
-        
+
         # Add a 'Select' column for user to choose which rows to predict
         if 'Select' not in df_uploaded.columns:
             df_uploaded.insert(0, 'Select', True) # Default all selected
@@ -88,13 +88,17 @@ selected_for_prediction = loaded_unseen_data[loaded_unseen_data['Select'] == Tru
 if selected_for_prediction.empty: # ตรวจสอบว่ามีข้อมูลที่เลือกหรือไม่
     st.warning("กรุณาเลือกข้อมูลรถบรรทุกอย่างน้อยหนึ่งแถวเพื่อทำการพยากรณ์") # แสดงคำเตือนถ้าไม่มีข้อมูล
     st.stop() # หยุดการทำงานของแอปพลิเคชัน
-    # User input for start time
+
+# --- Move Start Time Input here ---
+st.header("กำหนดเวลาเริ่มต้นสำหรับจัดตาราง")
 col1, col2 = st.columns(2) # แบ่งหน้าจอเป็น 2 คอลัมน์
 with col1:
     date_input = st.date_input("เลือกวันที่เริ่มต้นการประมวลผล", datetime.now().date()) # ให้ผู้ใช้เลือกวันที่เริ่มต้น
 with col2:
     time_input = st.time_input("เลือกเวลาเริ่มต้นการประมวลผล", datetime.now().time()) # ให้ผู้ใช้เลือกเวลาเริ่มต้น
 
+start_processing_time = datetime.combine(date_input, time_input)
+st.write(f"เวลาเริ่มต้นการประมวลผล: **{start_processing_time.strftime('%Y-%m-%d %H:%M:%S')}**")
 
 # --- 3. Prediction Logic ---
 if st.button("ทำการพยากรณ์และจัดตารางคิว"): # สร้างปุ่มสำหรับเริ่มการพยากรณ์และจัดตาราง
@@ -107,13 +111,13 @@ if st.button("ทำการพยากรณ์และจัดตารา
     # Ensure column order matches training data (from the kernel state, X.columns)
     # The X.columns from kernel state is: ['Staff_Count', 'Total_Cartons', 'SKU_Count', 'Truck_Type_4-Wheel', 'Truck_Type_6-Wheel', 'Operation_Type_Pickup', 'Weather_Rain', 'Work_Shift_Night']
     expected_model_columns = ['Staff_Count', 'Total_Cartons', 'SKU_Count', 'Truck_Type_4-Wheel', 'Truck_Type_6-Wheel', 'Operation_Type_Pickup', 'Weather_Rain', 'Work_Shift_Night']
-    
+
     # Check if all expected columns are in X_unseen_for_prediction
     missing_cols = set(expected_model_columns) - set(X_unseen_for_prediction.columns)
     if missing_cols:
         st.error(f"❌ ข้อมูลที่อัปโหลด/แก้ไขไม่มีคอลัมน์ที่จำเป็นสำหรับการทำนาย: {', '.join(missing_cols)} กรุณาตรวจสอบรูปแบบไฟล์")
         st.stop()
-    
+
     # Reindex to ensure correct column order and handle any extra columns from user input
     X_unseen_for_prediction = X_unseen_for_prediction[expected_model_columns]
 
@@ -131,9 +135,15 @@ if st.button("ทำการพยากรณ์และจัดตารา
     # --- 4. Scheduling Logic ---
     st.header("🗓️ ตารางเวลาการจัดคิวรถบรรทุก") # แสดงหัวข้อสำหรับตารางเวลา
 
+    # User input for start time (THIS WAS MOVED UP)
+    # col1, col2 = st.columns(2) # แบ่งหน้าจอเป็น 2 คอลัมน์
+    # with col1:
+    #     date_input = st.date_input("เลือกวันที่เริ่มต้นการประมวลผล", datetime.now().date()) # ให้ผู้ใช้เลือกวันที่เริ่มต้น
+    # with col2:
+    #     time_input = st.time_input("เลือกเวลาเริ่มต้นการประมวลผล", datetime.now().time()) # ให้ผู้ใช้เลือกเวลาเริ่มต้น
 
-    start_processing_time = datetime.combine(date_input, time_input) # รวมวันที่และเวลาที่เลือกเข้าด้วยกัน
-    st.write(f"เวลาเริ่มต้นการประมวลผล: **{start_processing_time.strftime('%Y-%m-%d %H:%M:%S')}**") # แสดงเวลาเริ่มต้นที่ผู้ใช้เลือก
+    # start_processing_time = datetime.combine(date_input, time_input)
+    # st.write(f"เวลาเริ่มต้นการประมวลผล: **{start_processing_time.strftime('%Y-%m-%d %H:%M:%S')}**")
 
     # Create scheduling DataFrame from prediction results
     scheduling_df = prediction_results.copy() # สร้าง DataFrame สำหรับการจัดตารางจากผลการทำนาย
@@ -190,7 +200,7 @@ if st.button("ทำการพยากรณ์และจัดตารา
 
     st.plotly_chart(fig_gantt, use_container_width=True) # แสดง Gantt Chart
 
-st.markdown("**วิธีใช้งาน:** \n1. อัปโหลดไฟล์ CSV หรือใช้ข้อมูลเริ่มต้น \n2. ตรวจสอบ แก้ไข และเลือกข้อมูลรถบรรทุกที่ต้องการพยากรณ์ในตาราง \n3. กดปุ่ม 'ทำการพยากรณ์และจัดตารางคิว' \n4. เลือกวันที่และเวลาเริ่มต้นที่ต้องการ \n5. ดูผลลัพธ์ตารางและ Gantt Chart ที่แสดงขึ้นมา") # แสดงคำแนะนำการใช้งาน
+st.markdown("**วิธีใช้งาน:** \n1. อัปโหลดไฟล์ CSV หรือใช้ข้อมูลเริ่มต้น \n2. ตรวจสอบ แก้ไข และเลือกข้อมูลรถบรรทุกที่ต้องการพยากรณ์ในตาราง \n3. เลือกวันที่และเวลาเริ่มต้นที่ต้องการ \n4. กดปุ่ม 'ทำการพยากรณ์และจัดตารางคิว' \n5. ดูผลลัพธ์ตารางและ Gantt Chart ที่แสดงขึ้นมา") # แสดงคำแนะนำการใช้งาน
 
 if st.button("🏠 กลับหน้าหลัก"): # สร้างปุ่ม 'กลับหน้าหลัก'
-    st.switch_page("app.py") # เปลี่ยนหน้าไปยัง 'app.py'
+    st.switch_page("app.py") # เปลี่ยนหน้าไปยัง 'app.py' 
