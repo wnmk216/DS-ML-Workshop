@@ -80,4 +80,7 @@ if st.button('ทำนายโอกาสขายสูง'):
     st.markdown(f"**คำแนะนำ:** {rec}")
 
     st.markdown("--- ยอดขายสูงถูกกำหนดเป็น Units_Sold >= 75th percentile ของข้อมูล --- ")
+    
+if st.button("🏠 กลับหน้าหลัก"): # สร้างปุ่ม 'กลับหน้าหลัก'
+    st.switch_page("app.py") # เปลี่ยนหน้าไปยัง 'app.py' 
 
