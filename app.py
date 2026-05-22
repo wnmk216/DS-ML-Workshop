@@ -5,6 +5,7 @@ st.set_page_config(page_title="MyApp", layout="wide")
 st.title("🏠 หน้าหลัก ")
 st.write("### Boot Camp: Data Science and Machine Learning")
 st.info("7 Day Intensive Hands-on Workshop")
+st.markdown(''':rainbow[Wanthanee Prachuabsupakij] ''')
 
 
 if st.button("การทำความสะอาดข้อมูล"):
