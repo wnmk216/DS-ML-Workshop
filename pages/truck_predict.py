@@ -1,4 +1,3 @@
-
 import streamlit as st
 import pandas as pd
 import joblib
@@ -35,7 +34,7 @@ if uploaded_file is not None:
     try:
         df_uploaded = pd.read_csv(uploaded_file)
         # Ensure boolean columns are correctly typed for uploaded data
-        for col in ['Truck_Type_4-Wheel', 'Truck_Type_6-Wheel', 'Operation_Type_Pickup', 'Weather_Rain', 'Work_Shift_Night']:
+        for col in ['Truck_Type_4-Wheel', 'Truck_Type_6-Wheel', 'Operation_Type_Pickup']:
             if col in df_uploaded.columns:
                 df_uploaded[col] = df_uploaded[col].astype(bool)
 
@@ -58,14 +57,13 @@ else:
         'Company_Name': ['บริษัทขนส่ง A', 'บริษัทโลจิสติกส์ B', 'บริษัทขนส่ง C', 'บริษัทขนส่ง D',
                          'บริษัทโลจิสติกส์ E', 'บริษัทขนส่ง F', 'บริษัทโลจิสติกส์ G', 'บริษัทขนส่ง H',
                          'บริษัทขนส่ง I', 'บริษัทโลจิสติกส์ J'],
-        'Staff_Count': [5, 7, 3, 6, 8, 4, 9, 2, 5, 7],
+        'Available_Docks': [3,1,2,5,4,3,2,1,5,2],
         'Total_Cartons': [150, 200, 100, 250, 180, 120, 300, 90, 220, 170],
         'SKU_Count': [3, 2, 4, 3, 2, 3, 4, 1, 3, 2],
         'Truck_Type_4-Wheel': [False, False, True, False, False, True, False, True, False, False],
         'Truck_Type_6-Wheel': [True, False, False, True, False, False, False, False, True, False],
-        'Operation_Type_Pickup': [True, False, False, True, False, True, False, False, True, False],
-        'Weather_Rain': [False, True, False, False, True, False, False, True, False, False],
-        'Work_Shift_Night': [True, False, True, False, True, False, True, False, True, False]
+        'Operation_Type_Pickup': [True, False, False, True, False, True, False, False, True, False]
+       
     })
     # Add 'Select' column to initial data
     if 'Select' not in df_for_editor.columns:
@@ -122,7 +120,7 @@ if st.button("ทำการพยากรณ์และจัดตารา
 
     # Ensure column order matches training data (from the kernel state, X.columns)
     # The X.columns from kernel state is: ['Staff_Count', 'Total_Cartons', 'SKU_Count', 'Truck_Type_4-Wheel', 'Truck_Type_6-Wheel', 'Operation_Type_Pickup', 'Weather_Rain', 'Work_Shift_Night']
-    expected_model_columns = ['Staff_Count', 'Total_Cartons', 'SKU_Count', 'Truck_Type_4-Wheel', 'Truck_Type_6-Wheel', 'Operation_Type_Pickup', 'Weather_Rain', 'Work_Shift_Night']
+    expected_model_columns = ['Available_Docks', 'Total_Cartons', 'SKU_Count', 'Truck_Type_4-Wheel', 'Truck_Type_6-Wheel', 'Operation_Type_Pickup']
 
     # Check if all expected columns are in X_unseen_for_prediction
     missing_cols = set(expected_model_columns) - set(X_unseen_for_prediction.columns)
@@ -171,7 +169,7 @@ if st.button("ทำการพยากรณ์และจัดตารา
 
     # Display the scheduling table
     display_cols = [ # กำหนดคอลัมน์ที่จะแสดงในตาราง
-        'Company_Name', 'Staff_Count', 'Total_Cartons', 'SKU_Count',
+        'Company_Name', 'Available_Docks', 'Total_Cartons', 'SKU_Count',
         'Predicted_Service_Min', 'Suggested_Arrival_Time', 'Completion_Time'
     ]
     st.dataframe(scheduling_df[display_cols]) # แสดงตารางการจัดคิว
@@ -187,7 +185,7 @@ if st.button("ทำการพยากรณ์และจัดตารา
                             x_end="Completion_Time",
                             y="Task",
                             color="Predicted_Service_Min",
-                            color_continuous_scale=px.colors.sequential.BuPu,
+                            color_continuous_scale=px.colors.sequential.Cividis,
                             title="ตารางเวลาการจัดคิวรถบรรทุก (Gantt Chart)",
                             labels={
                                 "Suggested_Arrival_Time": "เวลาที่ควรมาถึง",
@@ -205,4 +203,4 @@ if st.button("ทำการพยากรณ์และจัดตารา
 st.markdown("**วิธีใช้งาน:** \n1. อัปโหลดไฟล์ CSV หรือใช้ข้อมูลเริ่มต้น \n2. ตรวจสอบ แก้ไข และเลือกข้อมูลรถบรรทุกที่ต้องการพยากรณ์ในตาราง \n3. เลือกวันที่และเวลาเริ่มต้นที่ต้องการ \n4. กดปุ่ม 'ทำการพยากรณ์และจัดตารางคิว' \n5. ดูผลลัพธ์ตารางและ Gantt Chart ที่แสดงขึ้นมา") # แสดงคำแนะนำการใช้งาน
 
 if st.button("🏠 กลับหน้าหลัก"): # สร้างปุ่ม 'กลับหน้าหลัก'
-    st.switch_page("app.py") # เปลี่ยนหน้าไปยัง 'app.py' 
+    st.switch_page("app.py") # เปลี่ยนหน้าไปยัง 'app.py'
