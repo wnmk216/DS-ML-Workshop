@@ -1,4 +1,5 @@
-
+%%writefile association_recommend.py
+import streamlit as st # Import library Streamlit สำหรับสร้าง Web Application
 import pandas as pd # Import library Pandas สำหรับจัดการข้อมูล DataFrame
 import ast # Import ast for literal_eval to safely parse frozenset strings
 
@@ -6,7 +7,7 @@ import ast # Import ast for literal_eval to safely parse frozenset strings
 # ตรวจสอบให้แน่ใจว่า 'Model_association_Rules.csv' อยู่ในไดเรกทอรีเดียวกันกับแอป Streamlit นี้
 @st.cache_data # Decorator สำหรับ Cache ข้อมูล เพื่อให้ Streamlit โหลดข้อมูลเพียงครั้งเดียวเมื่อแอปเริ่มทำงาน
 def load_rules():
-    rules = pd.read_csv('model/Model_association_Rules.csv') # โหลดไฟล์ CSV ที่บันทึกกฎความสัมพันธ์
+    rules = pd.read_csv('model/Model_association_Rules.csv') # โหลดไฟล์ CSV ที่บันทึกกฎความสัมพันธ์ (corrected path)
     # แปลงคอลัมน์ 'antecedents' และ 'consequents' ที่เป็น string กลับไปเป็น frozenset
     # โดยการลบ 'frozenset(' และ ')' ออกก่อนใช้ ast.literal_eval
     rules['antecedents'] = rules['antecedents'].apply(lambda x: frozenset(ast.literal_eval(x.replace("frozenset(", "").replace(")", ""))))
