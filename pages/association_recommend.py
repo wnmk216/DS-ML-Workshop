@@ -1,15 +1,16 @@
 import streamlit as st # Import library Streamlit สำหรับสร้าง Web Application
 import pandas as pd # Import library Pandas สำหรับจัดการข้อมูล DataFrame
+import ast # Import ast for literal_eval to safely parse frozenset strings
 
 # --- 1. Load Association Rules ---
 # ตรวจสอบให้แน่ใจว่า 'Model_association_rules.csv' อยู่ในไดเรกทอรีเดียวกันกับแอป Streamlit นี้
 @st.cache_data # Decorator สำหรับ Cache ข้อมูล เพื่อให้ Streamlit โหลดข้อมูลเพียงครั้งเดียวเมื่อแอปเริ่มทำงาน
 def load_rules():
-    rules = pd.read_csv('model/Model_association_rules.csv') # โหลดไฟล์ CSV ที่บันทึกกฎความสัมพันธ์
+    rules = pd.read_csv('model/Model_association_Rules.csv') # โหลดไฟล์ CSV ที่บันทึกกฎความสัมพันธ์ (corrected path)
     # แปลงคอลัมน์ 'antecedents' และ 'consequents' ที่เป็น string กลับไปเป็น frozenset
     # เพื่อให้สามารถเปรียบเทียบและใช้งานได้ง่ายขึ้นในฟังก์ชันแนะนำ
-    rules['antecedents'] = rules['antecedents'].apply(lambda x: frozenset(item.strip() for item in x.split(', ')))
-    rules['consequents'] = rules['consequents'].apply(lambda x: frozenset(item.strip() for item in x.split(', ')))
+    rules['antecedents'] = rules['antecedents'].apply(lambda x: frozenset(ast.literal_eval(x))) # ใช้ ast.literal_eval เพื่อแปลง string เป็น frozenset
+    rules['consequents'] = rules['consequents'].apply(lambda x: frozenset(ast.literal_eval(x))) # ใช้ ast.literal_eval เพื่อแปลง string เป็น frozenset
     return rules
 
 df_rules_app = load_rules() # เรียกใช้ฟังก์ชันเพื่อโหลดกฎความสัมพันธ์เข้าสู่แอปพลิเคชัน
@@ -22,9 +23,9 @@ for s in df_rules_app['antecedents']: # วนลูปผ่าน Antecedents 
 for s in df_rules_app['consequents']: # วนลูปผ่าน Consequents ทั้งหมด
     all_items.update(s) # เพิ่มรายการใน Consequents เข้าไปใน Set
 
-unique_regions = sorted([item for item in all_items if item.startswith('Reg_')]) # กรองเฉพาะ Region และเรียงลำดับ
-unique_products = sorted([item for item in all_items if item.startswith('Prod_')]) # กรองเฉพาะ Product และเรียงลำดับ
-unique_channels = sorted([item for item in all_items if item.startswith('Chan_')]) # กรองเฉพาะ Channel และเรียงลำดับ
+unique_regions = sorted([item for item in all_items if item.startswith('Region_')]) # กรองเฉพาะ Region และเรียงลำดับ
+unique_products = sorted([item for item in all_items if item.startswith('Product_')]) # กรองเฉพาะ Product และเรียงลำดับ
+unique_channels = sorted([item for item in all_items if item.startswith('Channel_')]) # กรองเฉพาะ Channel และเรียงลำดับ
 
 # --- 3. Recommendation Function ---
 # ฟังก์ชันสำหรับให้คำแนะนำ โดยรับรายการที่ผู้ใช้เลือก (antecedents) และ DataFrame ของกฎความสัมพันธ์
@@ -62,9 +63,42 @@ def get_recommendations(user_selected_items: frozenset, rules_df: pd.DataFrame, 
     return final_recs # ส่งคืนรายการคำแนะนำ
 
 # --- 4. Streamlit App Layout ---
-st.set_page_config(layout="wide") # ตั้งค่าเลย์เอาต์ของ Streamlit ให้กว้างเต็มหน้าจอ
-st.title("🛒 Behavioral Association Recommendation Engine") # ตั้งชื่อแอปพลิเคชัน
-st.markdown("--- ให้ระบบแนะนำสินค้า/ช่องทาง/ภูมิภาคอื่น ๆ ที่ลูกค้ามีแนวโน้มจะสนใจ จากกฎความสัมพันธ์ ---") # เพิ่มข้อความอธิบาย
+st.set_page_config(layout="wide", page_title="TCP Recommendation Engine", page_icon="🛒") # ตั้งค่าเลย์เอาต์และชื่อหน้าเว็บ
+st.markdown(
+    """
+    <style>
+    .stApp { 
+        background-color: #f0f2f6; /* Light grey background */
+        color: #31333F;
+    }
+    .st-emotion-cache-1gsv4o2 {
+        background-color: #f0f2f6;
+        
+    }
+    .st-emotion-cache-1jm69f1 {
+        background-color: #f0f2f6;
+    }
+    h1, h2, h3, h4, h5, h6 {
+        color: #B10020; /* Red color for headers */
+    }
+    .stButton>button {
+        background-color: #B10020; /* Red button */
+        color: white;
+        border-radius: 5px;
+        border: none;
+        padding: 10px 20px;
+    }
+    .stButton>button:hover {
+        background-color: #8C0018; /* Darker red on hover */
+        color: white;
+    }
+    .reportview-container .main .block-container{padding-top:1rem;padding-right:1rem;padding-left:1rem;padding-bottom:1rem;}
+    </style>
+    """, unsafe_allow_html=True
+) # Custom CSS
+
+st.title("🛒 TCP Behavioral Association Recommendation Engine") # ตั้งชื่อแอปพลิเคชัน พร้อมระบุ TCP
+st.markdown("--- ให้ระบบแนะนำสินค้า/ช่องทาง/ภูมิภาคอื่น ๆ ที่ลูกค้ามีแนวโน้มจะสนใจ จากกฎความสัมพันธ์ --- ") # เพิ่มข้อความอธิบาย
 
 st.subheader("เลือกสิ่งที่ลูกค้ากำลังสนใจอยู่ (Antecedents):") # หัวข้อย่อยสำหรับส่วนที่ผู้ใช้เลือกข้อมูล
 
@@ -102,14 +136,14 @@ if st.button("💡 แนะนำ!"):
             st.success("ระบบแนะนำรายการต่อไปนี้:") # แสดงข้อความสำเร็จ
             for i, rec in enumerate(recommendations): # วนลูปแสดงผลคำแนะนำ
                 # แสดงผลคำแนะนำ โดยแทนที่ Prefix ให้เป็นข้อความที่อ่านง่ายขึ้น
-                st.write(f"**{i+1}. {rec.replace('Reg_', 'Region: ').replace('Prod_', 'Product: ').replace('Chan_', 'Channel: ')}**")
+                st.write(f"**{i+1}. {rec.replace('Region_', 'Region: ').replace('Product_', 'Product: ').replace('Channel_', 'Channel: ')}**")
         else:
             st.info("ไม่พบกฎการแนะนำสำหรับรายการที่คุณเลือก โปรดลองเลือกรายการอื่น ๆ") # ถ้าไม่พบคำแนะนำ
     else:
         st.warning("กรุณาเลือกอย่างน้อยหนึ่งรายการเพื่อรับคำแนะนำ") # แจ้งเตือนถ้าผู้ใช้ไม่ได้เลือกอะไรเลย
 
-st.markdown("---") # เส้นคั่น
+st.markdown("--- ") # เส้นคั่น
 st.markdown("**ข้อมูลเพิ่มเติม:** \n*   `Lift` > 1: บ่งชี้ความสัมพันธ์เชิงบวก \n*   `Confidence`: ความน่าจะเป็นที่ผู้ซื้อจะซื้อ Consequent ถ้าซื้อ Antecedent") # ข้อมูลเพิ่มเติมเกี่ยวกับ Metrics
-    
-if st.button("🏠 กลับหน้าหลัก"): # สร้างปุ่ม 'กลับหน้าหลัก'
-    st.switch_page("app.py") # เปลี่ยนหน้าไปยัง 'app.py' 
+
+if st.button("🏠 กลับหน้าหลัก"):
+    st.switch_page("app.py")
