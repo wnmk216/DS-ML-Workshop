@@ -73,5 +73,7 @@ if not df_rules.empty:
 
 st.markdown("--- ")
 st.markdown("ℹ️ หากต้องการรันแอปพลิเคชัน Streamlit นี้ ให้บันทึกโค้ดนี้เป็นไฟล์ Python (เช่น `app.py`) แล้วรันคำสั่ง `streamlit run app.py` ใน Terminal")
+if st.button("🏠 กลับหน้าหลัก"): # สร้างปุ่ม 'กลับหน้าหลัก'
+    st.switch_page("app.py") # เปลี่ยนหน้าไปยัง 'app.py' 
 
 
