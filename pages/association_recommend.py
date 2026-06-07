@@ -1,4 +1,4 @@
-%%writefile association_recommend.py
+
 import streamlit as st # Import library Streamlit สำหรับสร้าง Web Application
 import pandas as pd # Import library Pandas สำหรับจัดการข้อมูล DataFrame
 import ast # Import ast for literal_eval to safely parse frozenset strings
