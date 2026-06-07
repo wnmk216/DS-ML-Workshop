@@ -99,7 +99,7 @@ st.markdown(
     """, unsafe_allow_html=True
 ) # Custom CSS
 
-st.title("🛒 TCP Behavioral Association Recommendation Engine") # ตั้งชื่อแอปพลิเคชัน พร้อมระบุ TCP
+st.title("🛒 TCP Behavioral Association Recommendation") # ตั้งชื่อแอปพลิเคชัน พร้อมระบุ TCP
 st.markdown("--- ให้ระบบแนะนำสินค้า/ช่องทาง/ภูมิภาคอื่น ๆ ที่ลูกค้ามีแนวโน้มจะสนใจ จากกฎความสัมพันธ์ --- ") # เพิ่มข้อความอธิบาย
 
 st.subheader("เลือกสิ่งที่ลูกค้ากำลังสนใจอยู่ (Antecedents):") # หัวข้อย่อยสำหรับส่วนที่ผู้ใช้เลือกข้อมูล
