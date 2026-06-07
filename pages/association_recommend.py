@@ -1,31 +1,32 @@
-import streamlit as st # Import library Streamlit สำหรับสร้าง Web Application
+
 import pandas as pd # Import library Pandas สำหรับจัดการข้อมูล DataFrame
 import ast # Import ast for literal_eval to safely parse frozenset strings
 
 # --- 1. Load Association Rules ---
-# ตรวจสอบให้แน่ใจว่า 'Model_association_rules.csv' อยู่ในไดเรกทอรีเดียวกันกับแอป Streamlit นี้
+# ตรวจสอบให้แน่ใจว่า 'Model_association_Rules.csv' อยู่ในไดเรกทอรีเดียวกันกับแอป Streamlit นี้
 @st.cache_data # Decorator สำหรับ Cache ข้อมูล เพื่อให้ Streamlit โหลดข้อมูลเพียงครั้งเดียวเมื่อแอปเริ่มทำงาน
 def load_rules():
-    rules = pd.read_csv('model/Model_association_Rules.csv') # โหลดไฟล์ CSV ที่บันทึกกฎความสัมพันธ์ (corrected path)
+    rules = pd.read_csv('model/Model_association_Rules.csv') # โหลดไฟล์ CSV ที่บันทึกกฎความสัมพันธ์
     # แปลงคอลัมน์ 'antecedents' และ 'consequents' ที่เป็น string กลับไปเป็น frozenset
-    # เพื่อให้สามารถเปรียบเทียบและใช้งานได้ง่ายขึ้นในฟังก์ชันแนะนำ
-    rules['antecedents'] = rules['antecedents'].apply(lambda x: frozenset(ast.literal_eval(x))) # ใช้ ast.literal_eval เพื่อแปลง string เป็น frozenset
-    rules['consequents'] = rules['consequents'].apply(lambda x: frozenset(ast.literal_eval(x))) # ใช้ ast.literal_eval เพื่อแปลง string เป็น frozenset
+    # โดยการลบ 'frozenset(' และ ')' ออกก่อนใช้ ast.literal_eval
+    rules['antecedents'] = rules['antecedents'].apply(lambda x: frozenset(ast.literal_eval(x.replace("frozenset(", "").replace(")", ""))))
+    rules['consequents'] = rules['consequents'].apply(lambda x: frozenset(ast.literal_eval(x.replace("frozenset(", "").replace(")", ""))))
     return rules
 
 df_rules_app = load_rules() # เรียกใช้ฟังก์ชันเพื่อโหลดกฎความสัมพันธ์เข้าสู่แอปพลิเคชัน
 
 # --- 2. Extract Unique Items for Selection ---
-# ดึงรายการทั้งหมดที่เป็นเอกลักษณ์จากกฎความสัมพันธ์ เพื่อใช้เป็นตัวเลือกใน Multiselect ของ Streamlit
-all_items = set() # สร้าง Set เปล่าเพื่อเก็บรายการที่ไม่ซ้ำกัน
-for s in df_rules_app['antecedents']: # วนลูปผ่าน Antecedents ทั้งหมด
-    all_items.update(s) # เพิ่มรายการใน Antecedents เข้าไปใน Set
-for s in df_rules_app['consequents']: # วนลูปผ่าน Consequents ทั้งหมด
-    all_items.update(s) # เพิ่มรายการใน Consequents เข้าไปใน Set
+# ดึงรายการทั้งหมดที่เป็นเอกลักษณ์จากกฎความสัมพันธ์ และจัดหมวดหมู่ตามประเภทเดิม
+# (ค่าเหล่านี้อ้างอิงจาก df_raw.unique() ใน Jupyter Notebook)
 
-unique_regions = sorted([item for item in all_items if item.startswith('Region_')]) # กรองเฉพาะ Region และเรียงลำดับ
-unique_products = sorted([item for item in all_items if item.startswith('Product_')]) # กรองเฉพาะ Product และเรียงลำดับ
-unique_channels = sorted([item for item in all_items if item.startswith('Channel_')]) # กรองเฉพาะ Channel และเรียงลำดับ
+# Hardcoded unique values from the original dataframe columns
+all_regions = sorted(['USA-WEST', 'ASIA-PACIFIC', 'TH-NORTH', 'TH-CENTRAL', 'EUROPE-EU', 'USA-EAST', 'TH-SOUTH'])
+all_products = sorted(['Tropical Edition', 'Original Blue', 'Sugarfree', 'Krating Daeng 250', 'Red Edition'])
+all_channels = sorted(['extreme sports', 'f1 sponsorship', 'TV Ad', 'in-store promo', 'Social Media'])
+
+unique_regions = [item for item in all_regions if item in {x for s in df_rules_app['antecedents'] for x in s}.union({x for s in df_rules_app['consequents'] for x in s})]
+unique_products = [item for item in all_products if item in {x for s in df_rules_app['antecedents'] for x in s}.union({x for s in df_rules_app['consequents'] for x in s})]
+unique_channels = [item for item in all_channels if item in {x for s in df_rules_app['antecedents'] for x in s}.union({x for s in df_rules_app['consequents'] for x in s})]
 
 # --- 3. Recommendation Function ---
 # ฟังก์ชันสำหรับให้คำแนะนำ โดยรับรายการที่ผู้ใช้เลือก (antecedents) และ DataFrame ของกฎความสัมพันธ์
@@ -67,13 +68,13 @@ st.set_page_config(layout="wide", page_title="TCP Recommendation Engine", page_i
 st.markdown(
     """
     <style>
-    .stApp { 
+    .stApp {
         background-color: #f0f2f6; /* Light grey background */
         color: #31333F;
     }
     .st-emotion-cache-1gsv4o2 {
         background-color: #f0f2f6;
-        
+
     }
     .st-emotion-cache-1jm69f1 {
         background-color: #f0f2f6;
@@ -136,7 +137,14 @@ if st.button("💡 แนะนำ!"):
             st.success("ระบบแนะนำรายการต่อไปนี้:") # แสดงข้อความสำเร็จ
             for i, rec in enumerate(recommendations): # วนลูปแสดงผลคำแนะนำ
                 # แสดงผลคำแนะนำ โดยแทนที่ Prefix ให้เป็นข้อความที่อ่านง่ายขึ้น
-                st.write(f"**{i+1}. {rec.replace('Region_', 'Region: ').replace('Product_', 'Product: ').replace('Channel_', 'Channel: ')}**")
+                display_text = rec
+                if rec in all_regions:
+                    display_text = f"Region: {rec}"
+                elif rec in all_products:
+                    display_text = f"Product: {rec}"
+                elif rec in all_channels:
+                    display_text = f"Channel: {rec}"
+                st.write(f"**{i+1}. {display_text}**")
         else:
             st.info("ไม่พบกฎการแนะนำสำหรับรายการที่คุณเลือก โปรดลองเลือกรายการอื่น ๆ") # ถ้าไม่พบคำแนะนำ
     else:
