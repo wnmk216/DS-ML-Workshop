@@ -65,7 +65,7 @@ def get_recommendations(user_selected_items: frozenset, rules_df: pd.DataFrame, 
     return final_recs # ส่งคืนรายการคำแนะนำ
 
 # --- 4. Streamlit App Layout ---
-st.set_page_config(layout="wide", page_title="TCP Recommendation Engine", page_icon="🛒") # ตั้งค่าเลย์เอาต์และชื่อหน้าเว็บ
+st.set_page_config(layout="wide", page_title="TCP Recommendation", page_icon="🛒") # ตั้งค่าเลย์เอาต์และชื่อหน้าเว็บ
 st.markdown(
     """
     <style>
