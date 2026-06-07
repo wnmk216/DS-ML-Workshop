@@ -102,7 +102,7 @@ st.markdown(
 st.title("🛒 TCP Behavioral Association Recommendation") # ตั้งชื่อแอปพลิเคชัน พร้อมระบุ TCP
 st.markdown("--- ให้ระบบแนะนำสินค้า/ช่องทาง/ภูมิภาคอื่น ๆ ที่ลูกค้ามีแนวโน้มจะสนใจ จากกฎความสัมพันธ์ --- ") # เพิ่มข้อความอธิบาย
 
-st.subheader("เลือกสิ่งที่ลูกค้ากำลังสนใจอยู่ (Antecedents):") # หัวข้อย่อยสำหรับส่วนที่ผู้ใช้เลือกข้อมูล
+st.subheader("เลือกรายการที่สนใจ:") # หัวข้อย่อยสำหรับส่วนที่ผู้ใช้เลือกข้อมูล
 
 # Multiselect component สำหรับเลือกภูมิภาค
 selected_regions = st.multiselect(
@@ -131,7 +131,7 @@ user_input_items = frozenset(selected_regions + selected_products + selected_cha
 # ปุ่มสำหรับเรียกใช้การแนะนำ
 if st.button("💡 แนะนำ!"):
     if user_input_items: # ถ้าผู้ใช้เลือกรายการอย่างน้อยหนึ่งรายการ
-        st.subheader("ผลการแนะนำ (Consequents):") # หัวข้อย่อยสำหรับผลการแนะนำ
+        st.subheader("ผลการแนะนำ:") # หัวข้อย่อยสำหรับผลการแนะนำ
         recommendations = get_recommendations(user_input_items, df_rules_app) # เรียกใช้ฟังก์ชันแนะนำ
 
         if recommendations: # ถ้ามีคำแนะนำ
@@ -151,8 +151,6 @@ if st.button("💡 แนะนำ!"):
     else:
         st.warning("กรุณาเลือกอย่างน้อยหนึ่งรายการเพื่อรับคำแนะนำ") # แจ้งเตือนถ้าผู้ใช้ไม่ได้เลือกอะไรเลย
 
-st.markdown("--- ") # เส้นคั่น
-st.markdown("**ข้อมูลเพิ่มเติม:** \n*   `Lift` > 1: บ่งชี้ความสัมพันธ์เชิงบวก \n*   `Confidence`: ความน่าจะเป็นที่ผู้ซื้อจะซื้อ Consequent ถ้าซื้อ Antecedent") # ข้อมูลเพิ่มเติมเกี่ยวกับ Metrics
 
 if st.button("🏠 กลับหน้าหลัก"):
     st.switch_page("app.py")
