@@ -11,7 +11,7 @@ st.markdown("--- ")
 def load_rules():
     try:
         # Corrected file path: The file is in /content/, not /content/model/
-        df_rules = pd.read_csv('Model_Association_Rules_Item.csv')
+        df_rules = pd.read_csv('model/Model_Association_Rules_Item.csv')
         # Convert string representations of lists/frozensets back to actual lists/sets for filtering
         df_rules['antecedents'] = df_rules['antecedents'].apply(lambda x: frozenset(eval(x)) if isinstance(x, str) and x.startswith('frozenset') else frozenset(eval(x)) if isinstance(x, str) and x.startswith('[') else frozenset([x]))
         df_rules['consequents'] = df_rules['consequents'].apply(lambda x: frozenset(eval(x)) if isinstance(x, str) and x.startswith('frozenset') else frozenset(eval(x)) if isinstance(x, str) and x.startswith('[') else frozenset([x]))
