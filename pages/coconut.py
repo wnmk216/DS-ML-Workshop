@@ -75,14 +75,10 @@ if uploaded_file is not None:
                 while cap.isOpened():
                     ret, frame = cap.read()
                     st.write(frame.shape)
-                    st.stop()
+                    #st.stop()
                     if not ret:
                         break
 
-                    # Perform inference on the frame
-                    results = model.predict(source=frame, conf=0.25, verbose=False)
-                    st.write(results)
-                    
                     # Get the annotated frame
                     # r.plot() returns a BGR numpy array which cv2.VideoWriter expects
                     results = model.predict(frame, conf=0.25, verbose=False)
