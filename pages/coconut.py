@@ -17,7 +17,7 @@ st.set_page_config(
 
 # Load the trained YOLOv5 model
 # Make sure the path to your best.pt model is correct
-model_path = "/content/drive/MyDrive/Colab Notebooks/coconut/Yolo/data/v8/real-coconu-train-valid-test/runs/detect/real_3split_coconut_yolo/exp_v5s_detection/weights/best.pt"
+model_path = "model/best.pt"
 model = YOLO(model_path)
 
 # Thai text for titles and labels
