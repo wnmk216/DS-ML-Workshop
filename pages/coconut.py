@@ -99,8 +99,9 @@ with col1:
 
 with col2:
     # แสดงชื่อระบบเคียงข้างกับรูปภาพ
+    st.markdown('<p class="main-title" >---🥥--- </p>', unsafe_allow_html=True)
     st.markdown('<p class="main-title">ระบบจำแนกความเหมาะสมในการเก็บเกี่ยวมะพร้าวน้ำหอมอัตโนมัติ</p>', unsafe_allow_html=True)
-    st.markdown('<p class="sub-title">ตรวจสอบคุณภาพความสุกของมะพร้าวน้ำหอมด้วยเทคโนโลยี AI</p>', unsafe_allow_html=True)
+    st.markdown('<p class="sub-title">ตรวจจับความเหมาะสมในการเก็บเกี่ยวมะพร้าวน้ำหอมด้วยเทคโนโลยี AI</p>', unsafe_allow_html=True)
 
 
 # ==========================================================
