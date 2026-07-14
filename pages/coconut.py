@@ -81,9 +81,10 @@ if uploaded_file is not None:
 
                     # Get the annotated frame
                     # r.plot() returns a BGR numpy array which cv2.VideoWriter expects
-                    for r in results:
-                        annotated_frame = r.plot()
-                        out.write(annotated_frame)
+                    results = model.predict(frame, conf=0.25, verbose=False)
+                    
+                    annotated_frame = results[0].plot()
+                    out.write(annotated_frame)
 
                     frame_count += 1
                     progress = min(frame_count / total_frames, 1.0)
@@ -94,9 +95,14 @@ if uploaded_file is not None:
 
                 st.success("ตรวจจับมะพร้าวในวิดีโอเสร็จสมบูรณ์!")
                 st.subheader("ผลการตรวจจับ:")
-                st.video(output_video_path)
-
-                # Clean up temporary files
+                
+                with open(output_video_path, "rb") as f:
+                    video_bytes = f.read()
+                st.write("FPS =", fps)
+                st.write("Frames =", frame_count)
+                st.write("Output file size =", os.path.getsize(output_video_path))
+                st.video(video_bytes)
+                
                 os.remove(video_path)
                 os.remove(output_video_path)
 
