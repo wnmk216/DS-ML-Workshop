@@ -74,8 +74,8 @@ if uploaded_file is not None:
 
                 while cap.isOpened():
                     ret, frame = cap.read()
-                    #st.write(frame.shape)
-                    #st.stop()
+                    st.write(frame.shape)
+                    st.stop()
                     if not ret:
                         break
 
@@ -83,7 +83,7 @@ if uploaded_file is not None:
                     # r.plot() returns a BGR numpy array which cv2.VideoWriter expects
                     results = model.predict(frame, conf=0.25, verbose=False)
                     for r in results:
-                        #st.write(r.boxes)
+                        st.write(r.boxes)
                     annotated_frame = results[0].plot()
                     st.image(
                         cv2.cvtColor(annotated_frame, cv2.COLOR_BGR2RGB),
