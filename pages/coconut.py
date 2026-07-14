@@ -7,6 +7,13 @@ import numpy as np
 import tempfile
 import os
 
+# Install opencv-python to ensure it's available in the Streamlit environment
+# This addresses ImportError related to cv2
+if 'opencv-python' not in st.session_state:
+    st.session_state['opencv-python'] = True
+    st.spinner('Installing OpenCV... please wait')
+    os.system('pip install opencv-python -q')
+
 # Set page configuration
 st.set_page_config(
     page_title="ระบบจำแนกความเหมาะสมในการเก็บเกี่ยวมะพร้าวน้ำหอมอัตโนมัติ",
