@@ -92,7 +92,12 @@ if uploaded_file is not None:
 
                 cap.release()
                 out.release()
-
+                st.video(output_video_path)
+                st.download_button(
+                    "Download Result",
+                    open(output_video_path,"rb"),
+                    "result.mp4"
+                )
                 st.success("ตรวจจับมะพร้าวในวิดีโอเสร็จสมบูรณ์!")
                 st.subheader("ผลการตรวจจับ:")
                 
