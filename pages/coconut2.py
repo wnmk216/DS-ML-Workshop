@@ -58,7 +58,7 @@ st.markdown(f"""
 
 /* หัวข้อภาษาไทยบนภาพพื้นหลัง */
 .main-title-white {{
-    font-size: 30px;
+    font-size: 48px;
     color: #FFFFFF;
     font-weight: bold;
     margin: 0;
@@ -68,7 +68,7 @@ st.markdown(f"""
 /* คำอธิบายสั้นใต้หัวข้อ */
 .sub-title-white {{
     color: #E8F5E9;
-    font-size: 18px;
+    font-size: 30px;
     margin-top: 10px;
     margin-bottom: 0;
     text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.6);
