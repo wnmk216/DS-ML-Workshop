@@ -7,3 +7,7 @@ numpy
 seaborn
 matplotlib
 ultralytics
+opencv-python-headless
+Pillow
+torch
+torchvision
