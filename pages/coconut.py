@@ -18,7 +18,7 @@ st.set_page_config(
 col1,col2=st.columns([1,4])
 
 with col1:
-    st.image("coconut.png",width=120)
+    st.image("images/coconut2.png",width=120)
 
 with col2:
     st.markdown("""
