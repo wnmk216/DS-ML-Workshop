@@ -81,7 +81,8 @@ if uploaded_file is not None:
 
                     # Perform inference on the frame
                     results = model.predict(source=frame, conf=0.25, verbose=False)
-
+                    st.write(results)
+                    
                     # Get the annotated frame
                     # r.plot() returns a BGR numpy array which cv2.VideoWriter expects
                     results = model.predict(frame, conf=0.25, verbose=False)
@@ -116,9 +117,12 @@ if uploaded_file is not None:
                 st.write("FPS =", fps)
                 st.write("Frames =", frame_count)
                 st.write("Output file size =", os.path.getsize(output_video_path))
+                with open(output_video_path, "rb") as f:
+                    video_bytes = f.read()
+                
                 st.video(video_bytes)
                 
-                os.remove(video_path)
+                # ค่อยลบ
                 os.remove(output_video_path)
 
 st.write("---")
