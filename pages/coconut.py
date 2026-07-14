@@ -75,7 +75,7 @@ if uploaded_file is not None:
                 while cap.isOpened():
                     ret, frame = cap.read()
                     st.write(frame.shape)
-                    st.stop()
+                    #st.stop()
                     if not ret:
                         break
 
