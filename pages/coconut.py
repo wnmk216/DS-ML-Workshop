@@ -59,7 +59,8 @@ if uploaded_file is not None:
                     output_video_path = tmp_output_video_file.name
 
                 out = cv2.VideoWriter(output_video_path, codec, fps, (width, height))
-
+                st.write("VideoWriter opened:", out.isOpened())
+                
                 frame_count = 0
                 total_frames = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
                 if total_frames == 0: # Handle cases where total_frames might be 0
@@ -73,6 +74,8 @@ if uploaded_file is not None:
 
                 while cap.isOpened():
                     ret, frame = cap.read()
+                    st.write(frame.shape)
+                    st.stop()
                     if not ret:
                         break
 
@@ -82,8 +85,15 @@ if uploaded_file is not None:
                     # Get the annotated frame
                     # r.plot() returns a BGR numpy array which cv2.VideoWriter expects
                     results = model.predict(frame, conf=0.25, verbose=False)
-                    
+                    for r in results:
+                        st.write(r.boxes)
                     annotated_frame = results[0].plot()
+                    st.image(
+                        cv2.cvtColor(annotated_frame, cv2.COLOR_BGR2RGB),
+                        caption="Annotated"
+                    )
+                    
+                    st.stop()
                     out.write(annotated_frame)
 
                     frame_count += 1
