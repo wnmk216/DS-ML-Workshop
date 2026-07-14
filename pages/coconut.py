@@ -15,111 +15,191 @@ st.set_page_config(
     layout="centered",
     initial_sidebar_state="auto"
 )
+col1,col2=st.columns([1,4])
 
-# Load the trained YOLOv5 model
-# Make sure the path to your best.pt model is correct
-model_path = "model/best.pt"
-model = YOLO(model_path)
+with col1:
+    st.image("coconut.png",width=120)
 
-# Thai text for titles and labels
-app_title = "ระบบจำแนกความเหมาะสมในการเก็บเกี่ยวมะพร้าวน้ำหอมอัตโนมัติ"
-upload_prompt = "อัปโหลดไฟล์วิดีโอเพื่อตรวจจับมะพร้าว"
-detect_button_text = "ตรวจจับมะพร้าวในวิดีโอ"
-footer_text = "ระบบนี้ได้ทุนวิจัยสนับสนุนจากมหาวิทยาลัยเทคโนโลยีพระจอมเกล้าพระนครเหนือ"
+with col2:
+    st.markdown("""
+    <style>
+    
+    .stApp{
+        background-color:#F8FFF7;
+    }
+    
+    /* Header */
+    .main-title{
+        font-size:36px;
+        color:#1B5E20;
+        font-weight:bold;
+        text-align:center;
+    }
+    
+    .sub-title{
+        text-align:center;
+        color:#558B2F;
+        font-size:18px;
+        margin-bottom:20px;
+    }
+    
+    /* Card */
+    .block-container{
+        padding-top:2rem;
+    }
+    
+    div[data-testid="stVerticalBlock"]{
+        border-radius:15px;
+    }
+    
+    /* Button */
+    
+    .stButton>button{
+        background:#2E7D32;
+        color:white;
+        border-radius:10px;
+        border:none;
+        font-size:18px;
+        height:55px;
+        width:100%;
+    }
+    
+    .stButton>button:hover{
+        background:#1B5E20;
+        color:white;
+    }
+    
+    /* Upload */
+    
+    [data-testid="stFileUploader"]{
+        border:2px dashed #81C784;
+        border-radius:15px;
+        padding:15px;
+    }
+    
+    /* Success */
+    
+    .stAlert{
+        border-radius:10px;
+    }
+    
+    /* Footer */
+    
+    .footer{
+        text-align:center;
+        color:gray;
+        font-size:15px;
+        margin-top:40px;
+    }
+    
+    </style>
+    """,unsafe_allow_html=True)
 
-st.title(app_title)
 
-st.write("---")
-
-# Video uploader
-uploaded_file = st.file_uploader(upload_prompt, type=["mp4", "avi", "mov", "mkv"])
-
-if uploaded_file is not None:
-    st.video(uploaded_file, format=uploaded_file.type) # Display original video
-
-    if st.button(detect_button_text):
-        with st.spinner('กำลังตรวจจับมะพร้าวในวิดีโอ... โปรดรอสักครู่'):
-            # Create a temporary file to save the uploaded video
-            with tempfile.NamedTemporaryFile(delete=False, suffix='.mp4') as tmp_video_file:
-                tmp_video_file.write(uploaded_file.read())
-                video_path = tmp_video_file.name
-
-            cap = cv2.VideoCapture(video_path)
-            if not cap.isOpened():
-                st.error("ไม่สามารถเปิดไฟล์วิดีโอได้")
-                os.remove(video_path)
-            else:
-                width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
-                height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
-                fps = int(cap.get(cv2.CAP_PROP_FPS))
-                codec = cv2.VideoWriter_fourcc(*'mp4v') # Codec for .mp4, ensuring compatibility
-
-                # Create a temporary file for the output video
-                with tempfile.NamedTemporaryFile(delete=False, suffix='.mp4') as tmp_output_video_file:
-                    output_video_path = tmp_output_video_file.name
-
-                out = cv2.VideoWriter(output_video_path, codec, fps, (width, height))
-                st.write("VideoWriter opened:", out.isOpened())
-                
-                frame_count = 0
-                total_frames = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
-                if total_frames == 0: # Handle cases where total_frames might be 0
-                    st.warning("ไม่พบเฟรมในวิดีโอ")
-                    cap.release()
+    # Load the trained YOLOv5 model
+    # Make sure the path to your best.pt model is correct
+    model_path = "model/best.pt"
+    model = YOLO(model_path)
+    
+    # Thai text for titles and labels
+    app_title = "ระบบจำแนกความเหมาะสมในการเก็บเกี่ยวมะพร้าวน้ำหอมอัตโนมัติ"
+    upload_prompt = "อัปโหลดไฟล์วิดีโอเพื่อตรวจจับมะพร้าว"
+    detect_button_text = "ตรวจจับมะพร้าวในวิดีโอ"
+    footer_text = "ระบบนี้ได้ทุนวิจัยสนับสนุนจากมหาวิทยาลัยเทคโนโลยีพระจอมเกล้าพระนครเหนือ"
+    
+    st.title(app_title)
+    
+    st.write("---")
+    
+    # Video uploader
+    uploaded_file = st.file_uploader(upload_prompt, type=["mp4", "avi", "mov", "mkv"])
+    
+    if uploaded_file is not None:
+        st.video(uploaded_file, format=uploaded_file.type) # Display original video
+    
+        if st.button(detect_button_text):
+            with st.spinner('กำลังตรวจจับมะพร้าวในวิดีโอ... โปรดรอสักครู่'):
+                # Create a temporary file to save the uploaded video
+                with tempfile.NamedTemporaryFile(delete=False, suffix='.mp4') as tmp_video_file:
+                    tmp_video_file.write(uploaded_file.read())
+                    video_path = tmp_video_file.name
+    
+                cap = cv2.VideoCapture(video_path)
+                if not cap.isOpened():
+                    st.error("ไม่สามารถเปิดไฟล์วิดีโอได้")
                     os.remove(video_path)
-                    os.remove(output_video_path)
-                    st.stop()
-
-                progress_bar = st.progress(0)
-
-                while cap.isOpened():
-                    ret, frame = cap.read()
-                    st.write(frame.shape)
-                    #st.stop()
-                    if not ret:
-                        break
-
-                    # Get the annotated frame
-                    # r.plot() returns a BGR numpy array which cv2.VideoWriter expects
-                    results = model.predict(frame, conf=0.25, verbose=False)
-                    for r in results:
-                        st.write(r.boxes)
-                    annotated_frame = results[0].plot()
-                    st.image(
-                        cv2.cvtColor(annotated_frame, cv2.COLOR_BGR2RGB),
-                        caption="Annotated"
-                    )
+                else:
+                    width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
+                    height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
+                    fps = int(cap.get(cv2.CAP_PROP_FPS))
+                    codec = cv2.VideoWriter_fourcc(*'mp4v') # Codec for .mp4, ensuring compatibility
+    
+                    # Create a temporary file for the output video
+                    with tempfile.NamedTemporaryFile(delete=False, suffix='.mp4') as tmp_output_video_file:
+                        output_video_path = tmp_output_video_file.name
+    
+                    out = cv2.VideoWriter(output_video_path, codec, fps, (width, height))
+                    st.write("VideoWriter opened:", out.isOpened())
                     
-                    st.stop()
-                    out.write(annotated_frame)
-
-                    frame_count += 1
-                    progress = min(frame_count / total_frames, 1.0)
-                    progress_bar.progress(progress)
-
-                cap.release()
-                out.release()
-                st.video(output_video_path)
-                st.download_button(
-                    "Download Result",
-                    open(output_video_path,"rb"),
-                    "result.mp4"
-                )
-                st.success("ตรวจจับมะพร้าวในวิดีโอเสร็จสมบูรณ์!")
-                st.subheader("ผลการตรวจจับ:")
-                
-                with open(output_video_path, "rb") as f:
-                    video_bytes = f.read()
-                st.write("FPS =", fps)
-                st.write("Frames =", frame_count)
-                st.write("Output file size =", os.path.getsize(output_video_path))
-                with open(output_video_path, "rb") as f:
-                    video_bytes = f.read()
-                
-                st.video(video_bytes)
-                
-                # ค่อยลบ
-                os.remove(output_video_path)
-
-st.write("---")
-st.markdown(f"<p style='text-align: center; color: gray;'>{footer_text}</p>", unsafe_allow_html=True)
+                    frame_count = 0
+                    total_frames = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
+                    if total_frames == 0: # Handle cases where total_frames might be 0
+                        st.warning("ไม่พบเฟรมในวิดีโอ")
+                        cap.release()
+                        os.remove(video_path)
+                        os.remove(output_video_path)
+                        st.stop()
+    
+                    progress_bar = st.progress(0)
+    
+                    while cap.isOpened():
+                        ret, frame = cap.read()
+                        st.write(frame.shape)
+                        #st.stop()
+                        if not ret:
+                            break
+    
+                        # Get the annotated frame
+                        # r.plot() returns a BGR numpy array which cv2.VideoWriter expects
+                        results = model.predict(frame, conf=0.25, verbose=False)
+                        for r in results:
+                            st.write(r.boxes)
+                        annotated_frame = results[0].plot()
+                        st.image(
+                            cv2.cvtColor(annotated_frame, cv2.COLOR_BGR2RGB),
+                            caption="Annotated"
+                        )
+                        
+                        st.stop()
+                        out.write(annotated_frame)
+    
+                        frame_count += 1
+                        progress = min(frame_count / total_frames, 1.0)
+                        progress_bar.progress(progress)
+    
+                    cap.release()
+                    out.release()
+                    st.video(output_video_path)
+                    st.download_button(
+                        "Download Result",
+                        open(output_video_path,"rb"),
+                        "result.mp4"
+                    )
+                    st.success("ตรวจจับมะพร้าวในวิดีโอเสร็จสมบูรณ์!")
+                    st.subheader("ผลการตรวจจับ:")
+                    
+                    with open(output_video_path, "rb") as f:
+                        video_bytes = f.read()
+                    st.write("FPS =", fps)
+                    st.write("Frames =", frame_count)
+                    st.write("Output file size =", os.path.getsize(output_video_path))
+                    with open(output_video_path, "rb") as f:
+                        video_bytes = f.read()
+                    
+                    st.video(video_bytes)
+                    
+                    # ค่อยลบ
+                    os.remove(output_video_path)
+    
+    st.write("---")
+    st.markdown(f"<p style='text-align: center; color: gray;'>{footer_text}</p>", unsafe_allow_html=True)
